@@ -5,9 +5,33 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
-  release:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    needs: create-release
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
 
     strategy:
       matrix:
@@ -23,56 +47,35 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Electron app (macOS)
         if: matrix.os == 'macos-latest'
         run: npm run build:mac
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Electron app (Windows)
         if: matrix.os == 'windows-latest'
         run: npm run build:win
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload macOS artifacts
+      - name: List build output (debug)
+        run: ls -la dist/ || true
+
+      - name: Upload macOS release assets
         if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v4
+        uses: softprops/action-gh-release@v2
         with:
-          name: macos-build
-          path: dist/*.dmg
+          files: |
+            dist/*.dmg
+            dist/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Windows artifacts
+      - name: Upload Windows release assets
         if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v4
+        uses: softprops/action-gh-release@v2
         with:
-          name: windows-build
-          path: dist/*-setup.exe
-
-  publish:
-    needs: release
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Download macOS artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-build
-          path: ./artifacts
-
-      - name: Download Windows artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-build
-          path: ./artifacts
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ./artifacts/*
-          draft: false
-          prerelease: false
+          files: |
+            dist/*.exe
+            dist/*.msi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
