@@ -25,9 +25,24 @@ mac:
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  hardenedRuntime: true
+  gatekeeperAssess: false
   notarize: false
+  # Aby włączyć notarization (wymaga Apple Developer Account):
+  # notarize: {
+  #   teamId: "YOUR_TEAM_ID"
+  # }
+  # Dodaj w secrets GitHub Actions:
+  # APPLE_ID: twoj@email.com
+  # APPLE_APP_SPECIFIC_PASSWORD: xxxx-xxxx-xxxx-xxxx
+  # APPLE_TEAM_ID: XXXXXXXXXX
 dmg:
   artifactName: ${name}-${version}.${ext}
+  writeUpdateInfo: false
+  format: UDRO
+  # UDRO = Read-Only Disk Image (najszybszy i najbezpieczniejszy)
+  # UDZO = Compressed (wolniejszy)
+  # UDBZ = Better compression (najwolniejszy)
 linux:
   target:
     - AppImage
