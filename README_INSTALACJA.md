@@ -4,7 +4,16 @@
 
 To standardowy komunikat bezpieczeństwa macOS dla aplikacji pobranych spoza Mac App Store.
 
-### ✅ ROZWIĄZANIE (Terminal - NAJSZYBSZE)
+### ✅ ROZWIĄZANIE 1: Skrypt automatyczny (NAJŁATWIEJSZE)
+
+1. **Pobierz** plik `Usun-Kwarantanne-GrantLedger.command` z tego samego miejsca co GrantLedger
+2. **Kliknij dwukrotnie** na ten plik
+3. Skrypt automatycznie znajdzie i usunie kwarantannę
+4. Gotowe! Teraz możesz otworzyć GrantLedger
+
+---
+
+### ✅ ROZWIĄZANIE 2: Terminal (dla zaawansowanych)
 
 1. Otwórz **Terminal** (Applications → Utilities → Terminal)
 2. Wklej tę komendę i naciśnij Enter:

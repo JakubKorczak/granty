@@ -67,6 +67,7 @@ jobs:
           files: |
             dist/*.dmg
             dist/*.zip
+            Usun-Kwarantanne-GrantLedger.command
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
