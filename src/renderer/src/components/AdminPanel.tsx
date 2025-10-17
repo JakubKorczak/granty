@@ -18,6 +18,8 @@ export function AdminPanel({ data, onDataChange }: AdminPanelProps) {
   const [newIndirectLabel, setNewIndirectLabel] = useState('')
   const [newDirectGroupName, setNewDirectGroupName] = useState('')
   const [newIndirectGroupName, setNewIndirectGroupName] = useState('')
+  const [editingGroupName, setEditingGroupName] = useState<string | null>(null)
+  const [editGroupValue, setEditGroupValue] = useState('')
 
   const directGroupKeys = Object.keys(data.categories.DIRECT.groups)
   const indirectGroupKeys = Object.keys(data.categories.INDIRECT.groups)
@@ -175,6 +177,39 @@ export function AdminPanel({ data, onDataChange }: AdminPanelProps) {
     }
   }
 
+  // Rozpocznij edycję nazwy grupy
+  const startEditGroupName = (oldName: string) => {
+    setEditingGroupName(oldName)
+    setEditGroupValue(oldName)
+  }
+
+  // Zapisz edycję nazwy grupy - Koszty bezpośrednie
+  const saveDirectGroupName = (oldName: string, costType: 'DIRECT' | 'INDIRECT') => {
+    if (!editGroupValue.trim() || editGroupValue === oldName) {
+      setEditingGroupName(null)
+      return
+    }
+
+    if (data.categories[costType].groups[editGroupValue]) {
+      alert('Grupa o tej nazwie już istnieje!')
+      return
+    }
+
+    const newData = JSON.parse(JSON.stringify(data))
+    const items = newData.categories[costType].groups[oldName]
+    delete newData.categories[costType].groups[oldName]
+    newData.categories[costType].groups[editGroupValue] = items
+
+    onDataChange(newData)
+
+    if (costType === 'DIRECT') {
+      setSelectedDirectGroup(editGroupValue)
+    } else {
+      setSelectedIndirectGroup(editGroupValue)
+    }
+    setEditingGroupName(null)
+  }
+
   return (
     <div className="space-y-8">
       {/* Koszty Bezpośrednie */}
@@ -190,22 +225,54 @@ export function AdminPanel({ data, onDataChange }: AdminPanelProps) {
             <Label className="text-sm font-semibold mb-2 block">Wybierz grupę:</Label>
             <div className="flex gap-3 flex-wrap items-center">
               {directGroupKeys.map((groupKey) => (
-                <div key={groupKey} className="flex gap-1">
-                  <Button
-                    variant={selectedDirectGroup === groupKey ? 'default' : 'outline'}
-                    onClick={() => setSelectedDirectGroup(groupKey)}
-                    className="transition-all duration-200"
-                  >
-                    {groupKey}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => deleteDirectGroup(groupKey)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                <div key={groupKey} className="flex gap-1 items-center">
+                  {editingGroupName === groupKey ? (
+                    <>
+                      <Input
+                        value={editGroupValue}
+                        onChange={(e) => setEditGroupValue(e.target.value)}
+                        className="w-40"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') saveDirectGroupName(groupKey, 'DIRECT')
+                          if (e.key === 'Escape') setEditingGroupName(null)
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() => saveDirectGroupName(groupKey, 'DIRECT')}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <Save className="h-4 w-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant={selectedDirectGroup === groupKey ? 'default' : 'outline'}
+                        onClick={() => setSelectedDirectGroup(groupKey)}
+                        className="transition-all duration-200"
+                      >
+                        {groupKey}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => startEditGroupName(groupKey)}
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => deleteDirectGroup(groupKey)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -313,22 +380,54 @@ export function AdminPanel({ data, onDataChange }: AdminPanelProps) {
             <Label className="text-sm font-semibold mb-2 block">Wybierz grupę:</Label>
             <div className="flex gap-3 flex-wrap items-center">
               {indirectGroupKeys.map((groupKey) => (
-                <div key={groupKey} className="flex gap-1">
-                  <Button
-                    variant={selectedIndirectGroup === groupKey ? 'default' : 'outline'}
-                    onClick={() => setSelectedIndirectGroup(groupKey)}
-                    className="transition-all duration-200"
-                  >
-                    {groupKey}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => deleteIndirectGroup(groupKey)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                <div key={groupKey} className="flex gap-1 items-center">
+                  {editingGroupName === groupKey ? (
+                    <>
+                      <Input
+                        value={editGroupValue}
+                        onChange={(e) => setEditGroupValue(e.target.value)}
+                        className="w-40"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') saveDirectGroupName(groupKey, 'INDIRECT')
+                          if (e.key === 'Escape') setEditingGroupName(null)
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() => saveDirectGroupName(groupKey, 'INDIRECT')}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <Save className="h-4 w-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant={selectedIndirectGroup === groupKey ? 'default' : 'outline'}
+                        onClick={() => setSelectedIndirectGroup(groupKey)}
+                        className="transition-all duration-200"
+                      >
+                        {groupKey}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => startEditGroupName(groupKey)}
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => deleteIndirectGroup(groupKey)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                 </div>
               ))}
             </div>

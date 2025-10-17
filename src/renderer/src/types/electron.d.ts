@@ -16,6 +16,7 @@ export interface AppData {
     }
   }
   lastProjectName?: string
+  lastAgreementNumber?: string
   projectNames?: string[]
 }
 

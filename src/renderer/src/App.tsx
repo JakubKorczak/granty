@@ -151,6 +151,9 @@ export default function MinimalCostForm() {
             if (loaded.lastProjectName) {
               form.setValue('projectName', loaded.lastProjectName)
             }
+            if (loaded.lastAgreementNumber) {
+              form.setValue('agreementNumber', loaded.lastAgreementNumber)
+            }
           }
         }
       } catch (error) {
@@ -169,7 +172,8 @@ export default function MinimalCostForm() {
       if (window.electronAPI) {
         const appData: AppData = {
           categories: data,
-          lastProjectName: form.getValues('projectName')
+          lastProjectName: form.getValues('projectName'),
+          lastAgreementNumber: form.getValues('agreementNumber')
         }
         await window.electronAPI.saveData(appData)
       }
@@ -226,10 +230,15 @@ export default function MinimalCostForm() {
 
       doc.setFontSize(11)
       let y = 30
+
+      // Wyciągnij nazwę grupy
+      const groupName =
+        values.costType === 'DIRECT' ? values.directGroup || '-' : values.indirectGroup || '-'
+
       const rows: Array<[string, string]> = [
         ['NUMER UMOWY PROJEKTU', values.agreementNumber],
         ['NAZWA PROJEKTU', values.projectName],
-        ['RODZAJ KOSZTU', values.costType === 'DIRECT' ? data.DIRECT.label : data.INDIRECT.label],
+        ['GRUPA KOSZTU', groupName],
         ['KATEGORIA KOSZTU', resolveCategoryLabel(values)]
       ]
 
